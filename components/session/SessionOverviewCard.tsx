@@ -9,7 +9,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { CopyButton } from "@/components/CopyButton";
-import { JsonTreeRoot } from "@/components/JsonTree";
+import { JsonTree } from "@/components/JsonTree";
 import { StatPill } from "./StatPill";
 import type { Session } from "@/lib/types";
 import { formatLatency, formatTimestamp } from "@/lib/format";
@@ -60,9 +60,9 @@ export function SessionOverviewCard({ session }: { session: Session }) {
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2">
-            <JsonTreeRoot
+            <JsonTree
               data={session}
-              title="session object"
+              // title="session object"
               defaultExpandDepth={1}
             />
           </CollapsibleContent>

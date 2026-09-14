@@ -7,7 +7,7 @@ import { SessionOverviewCard } from "@/components/session/SessionOverviewCard";
 import { SessionCharts } from "@/components/session/SessionCharts";
 import { SessionGraphView } from "@/components/session/SessionGraphView";
 import { TraceItem } from "@/components/session/TraceItem";
-import { JsonTreeRoot } from "@/components/JsonTree";
+import { JsonTree } from "@/components/JsonTree";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -158,7 +158,7 @@ function ResultsState({ data }: { data: SessionApiResponse }) {
             </TabsContent>
 
             <TabsContent value="raw">
-              <JsonTreeRoot data={session} title="session (raw)" defaultExpandDepth={2} />
+              <JsonTree data={session} defaultExpandDepth={2} />
             </TabsContent>
           </Tabs>
         </div>
