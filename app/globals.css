@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Light theme (default) */
+  :root {
+    --background: 220.0 23.1% 97.5%;
+    --foreground: 217.5 28.6% 11.0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 217.5 28.6% 11.0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 217.5 28.6% 11.0%;
+
+    --primary: 35.9 85.0% 33.9%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222.9 20.0% 93.1%;
+    --secondary-foreground: 217.5 28.6% 11.0%;
+
+    --muted: 220.0 21.4% 94.5%;
+    --muted-foreground: 220.9 10.8% 40.0%;
+
+    --accent: 222.0 20.8% 90.6%;
+    --accent-foreground: 217.5 28.6% 11.0%;
+
+    --destructive: 355.8 65.0% 52.9%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214.3 15.2% 82.0%;
+    --input: 214.3 15.2% 82.0%;
+    --ring: 35.9 85.0% 33.9%;
+
+    --signal-amber: 35.9 85.0% 33.9%;
+    --signal-teal: 173.0 75.5% 28.8%;
+    --signal-violet: 248.6 54.9% 60.0%;
+    --signal-rose: 355.8 65.0% 52.9%;
+
+    --radius: 0.5rem;
+
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono",
+      Consolas, "Liberation Mono", monospace;
+  }
+
+  /* Dark theme */
+  .dark {
+    --background: 216.0 27.8% 7.1%;
+    --foreground: 216.0 11.6% 91.6%;
+
+    --card: 215.0 22.2% 10.6%;
+    --card-foreground: 216.0 11.6% 91.6%;
+
+    --popover: 215.0 22.2% 10.6%;
+    --popover-foreground: 216.0 11.6% 91.6%;
+
+    --primary: 35.8 78.8% 57.5%;
+    --primary-foreground: 41.5 100.0% 5.1%;
+
+    --secondary: 218.6 20.6% 13.3%;
+    --secondary-foreground: 216.0 11.6% 91.6%;
+
+    --muted: 216.0 22.4% 13.1%;
+    --muted-foreground: 220.0 10.0% 58.6%;
+
+    --accent: 218.8 21.5% 15.5%;
+    --accent-foreground: 216.0 11.6% 91.6%;
+
+    --destructive: 355.9 60.8% 62.0%;
+    --destructive-foreground: 353.7 57.6% 6.5%;
+
+    --border: 217.5 17.4% 18.0%;
+    --input: 217.5 17.4% 18.0%;
+    --ring: 35.8 78.8% 57.5%;
+
+    --signal-amber: 35.8 78.8% 57.5%;
+    --signal-teal: 172.9 48.6% 48.0%;
+    --signal-violet: 248.8 47.1% 65.9%;
+    --signal-rose: 355.9 60.8% 62.0%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  ::selection {
+    background-color: hsl(var(--primary) / 0.3);
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* React Flow overrides to match theme */
+.react-flow {
+  --xy-background-color: transparent;
+}
+.react-flow__attribution {
+  background: transparent !important;
+}
+.react-flow__attribution a {
+  color: hsl(var(--muted-foreground)) !important;
+  font-size: 10px !important;
+}
+.react-flow__controls-button {
+  background: hsl(var(--card)) !important;
+  border-bottom-color: hsl(var(--border)) !important;
+}
+.react-flow__controls-button:hover {
+  background: hsl(var(--accent)) !important;
+}
+.react-flow__controls-button svg {
+  fill: hsl(var(--foreground)) !important;
+}
