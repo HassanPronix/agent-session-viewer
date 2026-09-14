@@ -138,7 +138,7 @@ function ResultsState({ data }: { data: SessionApiResponse }) {
                   traces&quot; above to fetch them.
                 </p>
               ) : (
-                session.traces.map((trace, i) => (
+                [...session.traces].reverse().map((trace, i) => (
                   <TraceItem
                     key={trace.trace_id}
                     trace={trace}
