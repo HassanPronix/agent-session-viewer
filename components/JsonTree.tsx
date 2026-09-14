@@ -1,191 +1,177 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CopyButton } from "./CopyButton";
 
-type JsonValue = unknown;
-
-function valueKind(v: JsonValue): "object" | "array" | "string" | "number" | "boolean" | "null" | "undefined" {
-  if (v === null) return "null";
-  if (v === undefined) return "undefined";
-  if (Array.isArray(v)) return "array";
-  const t = typeof v;
-  if (t === "object") return "object";
-  if (t === "string") return "string";
-  if (t === "number") return "number";
-  if (t === "boolean") return "boolean";
-  return "string";
-}
-
-function Primitive({ value }: { value: JsonValue }) {
-  const kind = valueKind(value);
-  if (kind === "null" || kind === "undefined") {
-    return <span className="text-muted-foreground">null</span>;
-  }
-  if (kind === "boolean") {
-    return <span className="text-signal-violet">{String(value)}</span>;
-  }
-  if (kind === "number") {
-    return <span className="text-signal-amber">{String(value)}</span>;
-  }
-  // string
-  const str = value as string;
-  if (str === "") {
-    return <span className="italic text-muted-foreground">empty string</span>;
-  }
-  const isLong = str.length > 140;
-  const [expanded, setExpanded] = React.useState(false);
-  if (!isLong) {
-    return <span className="text-foreground/90">&quot;{str}&quot;</span>;
-  }
-  return (
-    <span className="text-foreground/90">
-      &quot;
-      {expanded ? (
-        <span className="whitespace-pre-wrap break-words">{str}</span>
-      ) : (
-        <span className="break-words">{str.slice(0, 140)}…</span>
-      )}
-      &quot;{" "}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setExpanded((v) => !v);
-        }}
-        className="text-signal-amber hover:underline"
-      >
-        {expanded ? "show less" : `show ${str.length - 140} more chars`}
-      </button>
-    </span>
-  );
-}
-
-export function JsonTree({
-  data,
-  name,
-  depth = 0,
-  defaultExpandDepth = 1,
+function JsonItem({
+  index,
+  value,
 }: {
-  data: JsonValue;
-  name?: string;
-  depth?: number;
-  defaultExpandDepth?: number;
+  index: number;
+  value: unknown;
 }) {
-  const kind = valueKind(data);
-  const isContainer = kind === "object" || kind === "array";
-  const [open, setOpen] = React.useState(depth < defaultExpandDepth);
+  const [open, setOpen] = useState(false);
 
-  if (!isContainer) {
-    return (
-      <div className="flex items-start gap-1.5 py-0.5 pl-5 font-mono text-[12.5px] leading-relaxed">
-        {name !== undefined && (
-          <span className="shrink-0 text-signal-teal">{name}:</span>
-        )}
-        <Primitive value={data} />
-      </div>
-    );
-  }
+  const preview =
+    typeof value === "string"
+      ? value
+      : value === null
+        ? "null"
+        : Array.isArray(value)
+          ? `Array (${value.length})`
+          : typeof value === "object"
+            ? "Object"
+            : String(value);
 
-  const entries: [string, JsonValue][] =
-    kind === "array"
-      ? (data as JsonValue[]).map((v, i) => [String(i), v])
-      : Object.entries(data as Record<string, JsonValue>);
-
-  const count = entries.length;
-  const brackets = kind === "array" ? ["[", "]"] : ["{", "}"];
-
-  if (count === 0) {
-    return (
-      <div className="flex items-center gap-1.5 py-0.5 pl-5 font-mono text-[12.5px] leading-relaxed">
-        {name !== undefined && (
-          <span className="text-signal-teal">{name}:</span>
-        )}
-        <span className="text-muted-foreground">
-          {brackets[0]}
-          {brackets[1]} empty
-        </span>
-      </div>
-    );
-  }
+  const isExpandable = (typeof value === "object" && value !== null) || typeof value === "string";
 
   return (
-    <div className="font-mono text-[12.5px] leading-relaxed">
+    <div className="border-b border-border last:border-b-0">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="group flex w-full items-center gap-1 rounded py-0.5 pl-1 text-left hover:bg-accent/60"
+        onClick={() => isExpandable && setOpen((v) => !v)}
+        className={cn(
+          "flex w-full items-start gap-2 px-3 py-2 text-left",
+          isExpandable && "cursor-pointer hover:bg-muted/50"
+        )}
       >
-        <ChevronRight
-          className={cn(
-            "h-3 w-3 shrink-0 text-muted-foreground transition-transform",
-            open && "rotate-90"
-          )}
-        />
-        {name !== undefined && (
-          <span className="text-signal-teal">{name}:</span>
+        {isExpandable ? (
+          <ChevronRight
+            className={cn(
+              "mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+              open && "rotate-90"
+            )}
+          />
+        ) : (
+          <span className="w-4 shrink-0" />
         )}
-        <span className="text-muted-foreground">
-          {brackets[0]}
-          {!open && (
-            <>
-              <span className="px-1 text-[11px]">
-                {count} {kind === "array" ? "item" : "key"}
-                {count === 1 ? "" : "s"}
-              </span>
-              {brackets[1]}
-            </>
-          )}
+
+        <span className="shrink-0 text-xs font-medium text-muted-foreground">
+          {index}:
         </span>
-        {open && (
-          <span className="ml-auto pr-1 text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100">
-            {count} {kind === "array" ? "items" : "keys"}
-          </span>
-        )}
+
+        <span className="min-w-0 truncate text-[13px] text-foreground/90">
+          {preview}
+        </span>
       </button>
+
       {open && (
-        <div className="ml-2 border-l border-border/70 pl-1">
-          {entries.map(([k, v]) => (
+        <div className="px-8 pb-3">
+          {typeof value === "object" && value !== null ? (
             <JsonTree
-              key={k}
-              name={k}
-              data={v}
-              depth={depth + 1}
-              defaultExpandDepth={defaultExpandDepth}
+              data={value}
+              defaultExpandDepth={1}
             />
-          ))}
-          <div className="pl-5 text-muted-foreground">{brackets[1]}</div>
+          ) : (
+            <div className="whitespace-pre-wrap break-words text-[13px] text-foreground/90">
+              {String(value)}
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-export function JsonTreeRoot({
+export function JsonTree({
   data,
-  title,
   defaultExpandDepth = 1,
 }: {
-  data: JsonValue;
-  title?: string;
+  data: unknown;
   defaultExpandDepth?: number;
 }) {
+  if (Array.isArray(data)) {
+    return (
+      <div className="rounded-md border border-border">
+        {data.map((item, index) => (
+          <JsonItem
+            key={index}
+            index={index}
+            value={item}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (data !== null && typeof data === "object") {
+    return (
+      <div className="rounded-md border border-border">
+        {Object.entries(data).map(([key, value]) => (
+          <JsonObjectItem
+            key={key}
+            name={key}
+            value={value}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  return null;
+}
+function JsonObjectItem({
+  name,
+  value,
+}: {
+  name: string;
+  value: unknown;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const isContainer = typeof value === "object" && value !== null;
+  const isExpandable = isContainer || typeof value === "string";
+
+  const preview =
+    typeof value === "string"
+      ? value
+      : value === null
+        ? "null"
+        : isExpandable
+          ? Array.isArray(value)
+            ? `Array (${value.length})`
+            : "Object"
+          : String(value);
+
   return (
-    <div className="rounded-md border border-border bg-background/40">
-      <div className="flex items-center justify-between border-b border-border/70 px-2.5 py-1.5">
-        <span className="text-[11px] font-medium text-muted-foreground">
-          {title ?? "Raw JSON"}
+    <div className="border-b border-border last:border-b-0">
+      <button
+        type="button"
+        onClick={() => isExpandable && setOpen((v) => !v)}
+        className="flex w-full items-start gap-2 px-3 py-2 text-left hover:bg-muted/50"
+      >
+        {isExpandable ? (
+          <ChevronRight
+            className={cn(
+              "mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+              open && "rotate-90"
+            )}
+          />
+        ) : (
+          <span className="w-4 shrink-0" />
+        )}
+
+        <span className="shrink-0 text-xs font-medium text-muted-foreground">
+          {name}:
         </span>
-        <CopyButton
-          value={JSON.stringify(data, null, 2)}
-          label="Copy JSON"
-        />
-      </div>
-      <div className="max-h-[420px] overflow-auto p-2 scrollbar-thin">
-        <JsonTree data={data} defaultExpandDepth={defaultExpandDepth} />
-      </div>
+
+        <span className="min-w-0 truncate text-[13px]">
+          {preview}
+        </span>
+      </button>
+
+      {open && isContainer && (
+        <div className="px-8 pb-3">
+          <JsonTree data={value} defaultExpandDepth={1} />
+        </div>
+      )}
+
+      {open && !isContainer && (
+        <div className="px-8 pb-3 whitespace-pre-wrap break-words text-[13px]">
+          {String(value)}
+        </div>
+      )}``
     </div>
   );
 }
