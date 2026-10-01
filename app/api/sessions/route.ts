@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       data: formBody.toString(),
-      timeout: 30_000,
+      timeout: 180_000,
       validateStatus: () => true,
     });
 
