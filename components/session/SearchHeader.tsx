@@ -45,6 +45,7 @@ export function SearchHeader({
 
   const [savedCredentials, setSavedCredentials] = React.useState<SavedCredential[]>([]);
   const [selectedCredentialId, setSelectedCredentialId] = React.useState("");
+  const [headerCollapsed, setHeaderCollapsed] = React.useState(false);
 
   const canSearch =
     apiKey.trim() &&
@@ -180,11 +181,21 @@ export function SearchHeader({
     });
   };
 
-  return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto max-w-6xl px-6 py-4">
 
-        <div className="mb-3 flex items-center gap-2">
+  return (
+    <header
+      className={cn(
+        "sticky top-0 z-20 border-b border-border",
+        "bg-background/95 backdrop-blur",
+        "supports-[backdrop-filter]:bg-background/80",
+        "transition-all duration-200"
+      )}
+    >
+      <div className="mx-auto max-w-6xl px-6">
+
+        {/* Top bar - always visible */}
+        <div className="flex min-h-12 items-center gap-2">
+
           <div className="h-2 w-2 rounded-full bg-primary" />
 
           <h1 className="text-sm font-semibold text-foreground">
@@ -195,268 +206,357 @@ export function SearchHeader({
             Kore.ai Agent Platform
           </span>
 
-          <ThemeToggle className="ml-auto" />
-        </div>
+          {/* Show current selected credential when collapsed */}
+          {headerCollapsed && selectedCredentialId && (
+            <>
+              <span className="text-muted-foreground">·</span>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-
-          {/* Saved credentials */}
-          {savedCredentials.length > 0 && (
-            <div className="flex flex-wrap items-end gap-2">
-
-              <div className="space-y-1.5 min-w-[250px]">
-                <Label htmlFor="savedCredentials">
-                  Saved credentials
-                </Label>
-
-                <select
-                  id="savedCredentials"
-                  value={selectedCredentialId}
-                  onChange={handleCredentialSelect}
-                  className={cn(
-                    "flex h-9 w-full rounded-md border border-input",
-                    "bg-background px-3 py-1 text-sm",
-                    "shadow-sm transition-colors",
-                    "focus-visible:outline-none",
-                    "focus-visible:ring-1",
-                    "focus-visible:ring-ring"
-                  )}
-                >
-                  <option value="">
-                    Select saved credentials...
-                  </option>
-
-                  {savedCredentials.map((credential) => (
-                    <option
-                      key={credential.id}
-                      value={credential.id}
-                    >
-                      {credential.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleDeleteCredentials}
-                disabled={!selectedCredentialId}
-                title="Delete saved credentials"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-
-            </div>
+              <span className="max-w-[180px] truncate text-xs text-muted-foreground">
+                {
+                  savedCredentials.find(
+                    (credential) =>
+                      credential.id === selectedCredentialId
+                  )?.name
+                }
+              </span>
+            </>
           )}
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.1fr_1.1fr_1.4fr_auto]">
+          <div className="ml-auto flex items-center gap-2">
 
-            {/* App ID */}
-            <div className="space-y-1.5">
-              <Label htmlFor="appId">
-                App ID
-              </Label>
+            <ThemeToggle />
 
-              <Input
-                id="appId"
-                placeholder="st-xxxxxxxx-xxxx-xxxx"
-                value={appId}
-                onChange={(e) => setAppId(e.target.value)}
-                autoComplete="off"
-              />
-            </div>
-
-            {/* Session ID */}
-            <div className="space-y-1.5">
-              <Label htmlFor="sessionId">
-                Session ID
-              </Label>
-
-              <Input
-                id="sessionId"
-                placeholder="s-xxxxxxxx-xxxx-xxxx"
-                value={sessionId}
-                onChange={(e) => setSessionId(e.target.value)}
-                autoComplete="off"
-              />
-            </div>
-
-            {/* API Key */}
-            <div className="space-y-1.5">
-              <Label htmlFor="apiKey">
-                x-api-key
-              </Label>
-
-              <div className="relative">
-
-                <Input
-                  id="apiKey"
-                  type={showApiKey ? "text" : "password"}
-                  placeholder="Your API key"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  autoComplete="off"
-                  className="pr-9"
-                />
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowApiKey((v) => !v)
-                  }
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  aria-label={
-                    showApiKey
-                      ? "Hide API key"
-                      : "Show API key"
-                  }
-                >
-                  {showApiKey ? (
-                    <EyeOff className="h-3.5 w-3.5" />
-                  ) : (
-                    <Eye className="h-3.5 w-3.5" />
-                  )}
-                </button>
-
-              </div>
-            </div>
-
-            {/* Save + Search */}
-            <div className="flex items-end gap-2">
-
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSaveCredentials}
-                disabled={
-                  !appId.trim() ||
-                  !sessionId.trim() ||
-                  !apiKey.trim()
-                }
-                title="Save credentials"
-              >
-                <Save className="h-4 w-4" />
-                Save
-              </Button>
-
-              <Button
-                type="submit"
-                disabled={!canSearch}
-                className="w-full lg:w-auto"
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Search className="h-4 w-4" />
-                )}
-
-                Search
-              </Button>
-
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="includeTraces"
-                checked={includeTraces}
-                onCheckedChange={(v) => {
-                  const checked = v === true;
-
-                  setIncludeTraces(checked);
-
-                  if (!checked) {
-                    setIncludeObservations(false);
-                  }
-                }}
-              />
-
-              <Label
-                htmlFor="includeTraces"
-                className="cursor-pointer text-foreground/80"
-              >
-                Include traces
-              </Label>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="includeObservations"
-                checked={includeObservations}
-                onCheckedChange={(v) => {
-                  const checked = v === true;
-
-                  setIncludeObservations(checked);
-
-                  if (checked) {
-                    setIncludeTraces(true);
-                  }
-                }}
-              />
-
-              <Label
-                htmlFor="includeObservations"
-                className="cursor-pointer text-foreground/80"
-              >
-                Include observations
-              </Label>
-            </div>
-
-            <Collapsible
-              open={advancedOpen}
-              onOpenChange={setAdvancedOpen}
-              className="ml-auto"
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                setHeaderCollapsed((value) => !value)
+              }
+              className="gap-1.5"
             >
-              <CollapsibleTrigger asChild>
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Advanced
+              {headerCollapsed ? "Expand" : "Collapse"}
 
-                  <ChevronDown
-                    className={cn(
-                      "h-3.5 w-3.5 transition-transform",
-                      advancedOpen && "rotate-180"
-                    )}
-                  />
-                </button>
-              </CollapsibleTrigger>
-            </Collapsible>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 transition-transform duration-200",
+                  headerCollapsed && "-rotate-90"
+                )}
+              />
+            </Button>
 
           </div>
+        </div>
 
-          <Collapsible
-            open={advancedOpen}
-            onOpenChange={setAdvancedOpen}
-          >
-            <CollapsibleContent>
+        {/* Collapsible content */}
+        {!headerCollapsed && (
+          <div className="pb-4">
 
-              <div className="max-w-sm space-y-1.5 pt-1">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-3"
+            >
 
-                <Label htmlFor="baseUrl">
-                  API base URL
-                </Label>
+              {/* Saved credentials */}
+              {savedCredentials.length > 0 && (
+                <div className="flex flex-wrap items-end gap-2">
 
-                <Input
-                  id="baseUrl"
-                  value={baseUrl}
-                  onChange={(e) =>
-                    setBaseUrl(e.target.value)
-                  }
-                  placeholder={DEFAULT_BASE_URL}
-                />
+                  <div className="min-w-[250px] space-y-1.5">
+
+                    <Label htmlFor="savedCredentials">
+                      Saved credentials
+                    </Label>
+
+                    <select
+                      id="savedCredentials"
+                      value={selectedCredentialId}
+                      onChange={handleCredentialSelect}
+                      className={cn(
+                        "flex h-9 w-full rounded-md",
+                        "border border-input",
+                        "bg-background px-3 py-1 text-sm",
+                        "shadow-sm transition-colors",
+                        "focus-visible:outline-none",
+                        "focus-visible:ring-1",
+                        "focus-visible:ring-ring"
+                      )}
+                    >
+                      <option value="">
+                        Select saved credentials...
+                      </option>
+
+                      {savedCredentials.map((credential) => (
+                        <option
+                          key={credential.id}
+                          value={credential.id}
+                        >
+                          {credential.name}
+                        </option>
+                      ))}
+                    </select>
+
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={handleDeleteCredentials}
+                    disabled={!selectedCredentialId}
+                    title="Delete saved credentials"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+
+                </div>
+              )}
+
+              {/* Main inputs */}
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.1fr_1.1fr_1.4fr_auto]">
+
+                {/* App ID */}
+                <div className="space-y-1.5">
+
+                  <Label htmlFor="appId">
+                    App ID
+                  </Label>
+
+                  <Input
+                    id="appId"
+                    placeholder="st-xxxxxxxx-xxxx-xxxx"
+                    value={appId}
+                    onChange={(e) =>
+                      setAppId(e.target.value)
+                    }
+                    autoComplete="off"
+                  />
+
+                </div>
+
+                {/* Session ID */}
+                <div className="space-y-1.5">
+
+                  <Label htmlFor="sessionId">
+                    Session ID
+                  </Label>
+
+                  <Input
+                    id="sessionId"
+                    placeholder="s-xxxxxxxx-xxxx-xxxx"
+                    value={sessionId}
+                    onChange={(e) =>
+                      setSessionId(e.target.value)
+                    }
+                    autoComplete="off"
+                  />
+
+                </div>
+
+                {/* API Key */}
+                <div className="space-y-1.5">
+
+                  <Label htmlFor="apiKey">
+                    x-api-key
+                  </Label>
+
+                  <div className="relative">
+
+                    <Input
+                      id="apiKey"
+                      type={
+                        showApiKey
+                          ? "text"
+                          : "password"
+                      }
+                      placeholder="Your API key"
+                      value={apiKey}
+                      onChange={(e) =>
+                        setApiKey(e.target.value)
+                      }
+                      autoComplete="off"
+                      className="pr-9"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowApiKey((v) => !v)
+                      }
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={
+                        showApiKey
+                          ? "Hide API key"
+                          : "Show API key"
+                      }
+                    >
+                      {showApiKey ? (
+                        <EyeOff className="h-3.5 w-3.5" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+
+                  </div>
+
+                </div>
+
+                {/* Save + Search */}
+                <div className="flex items-end gap-2">
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleSaveCredentials}
+                    disabled={
+                      !appId.trim() ||
+                      !sessionId.trim() ||
+                      !apiKey.trim()
+                    }
+                    title="Save credentials"
+                  >
+                    <Save className="h-4 w-4" />
+                    Save
+                  </Button>
+
+                  <Button
+                    type="submit"
+                    disabled={!canSearch}
+                    className="w-full lg:w-auto"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Search className="h-4 w-4" />
+                    )}
+
+                    Search
+                  </Button>
+
+                </div>
 
               </div>
 
-            </CollapsibleContent>
-          </Collapsible>
+              {/* Options */}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
 
-        </form>
+                <div className="flex items-center gap-2">
+
+                  <Checkbox
+                    id="includeTraces"
+                    checked={includeTraces}
+                    onCheckedChange={(v) => {
+
+                      const checked = v === true;
+
+                      setIncludeTraces(checked);
+
+                      if (!checked) {
+                        setIncludeObservations(false);
+                      }
+
+                    }}
+                  />
+
+                  <Label
+                    htmlFor="includeTraces"
+                    className="cursor-pointer text-foreground/80"
+                  >
+                    Include traces
+                  </Label>
+
+                </div>
+
+                <div className="flex items-center gap-2">
+
+                  <Checkbox
+                    id="includeObservations"
+                    checked={includeObservations}
+                    onCheckedChange={(v) => {
+
+                      const checked = v === true;
+
+                      setIncludeObservations(checked);
+
+                      if (checked) {
+                        setIncludeTraces(true);
+                      }
+
+                    }}
+                  />
+
+                  <Label
+                    htmlFor="includeObservations"
+                    className="cursor-pointer text-foreground/80"
+                  >
+                    Include observations
+                  </Label>
+
+                </div>
+
+                <Collapsible
+                  open={advancedOpen}
+                  onOpenChange={setAdvancedOpen}
+                  className="ml-auto"
+                >
+
+                  <CollapsibleTrigger asChild>
+
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Advanced
+
+                      <ChevronDown
+                        className={cn(
+                          "h-3.5 w-3.5 transition-transform",
+                          advancedOpen &&
+                          "rotate-180"
+                        )}
+                      />
+
+                    </button>
+
+                  </CollapsibleTrigger>
+
+                </Collapsible>
+
+              </div>
+
+              {/* Advanced */}
+              <Collapsible
+                open={advancedOpen}
+                onOpenChange={setAdvancedOpen}
+              >
+
+                <CollapsibleContent>
+
+                  <div className="max-w-sm space-y-1.5 pt-1">
+
+                    <Label htmlFor="baseUrl">
+                      API base URL
+                    </Label>
+
+                    <Input
+                      id="baseUrl"
+                      value={baseUrl}
+                      onChange={(e) =>
+                        setBaseUrl(e.target.value)
+                      }
+                      placeholder={DEFAULT_BASE_URL}
+                    />
+
+                  </div>
+
+                </CollapsibleContent>
+
+              </Collapsible>
+
+            </form>
+
+          </div>
+        )}
+
       </div>
     </header>
   );
